@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="footerm">
+	<schema id="fr.oupson.FooTerm" path="/fr/oupson/FooTerm/">
+	</schema>
+</schemalist>

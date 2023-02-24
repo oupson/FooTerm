@@ -1,0 +1,6 @@
+data/fr.oupson.FooTerm.desktop.in
+data/fr.oupson.FooTerm.appdata.xml.in
+data/fr.oupson.FooTerm.gschema.xml
+src/main.vala
+src/window.vala
+src/window.ui

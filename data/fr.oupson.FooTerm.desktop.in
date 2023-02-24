@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=footerm
+Exec=footerm
+Icon=fr.oupson.FooTerm
+Terminal=false
+Type=Application
+Categories=GTK;
+StartupNotify=true
