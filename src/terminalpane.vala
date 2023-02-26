@@ -157,13 +157,20 @@ namespace FooTerm {
             }
 
             try {
+                ssize_t size = 0;
                 var buffer = new uint8[1024];
-                var size = this.channel.read(buffer);
-                debug("Got %zu from ssh", size);
-
-                if (Posix.write(this.slave_pty, buffer, size) < 0) {
-                    throw GLib.IOError.from_errno(Posix.errno);
-                }
+                do {
+                    size = this.channel.read(buffer);
+                    if (size > 0) {
+                        debug("Got %zd bytes from ssh", size);
+                        if (Posix.write(this.slave_pty, buffer, size) < 0) {
+                            throw GLib.IOError.from_errno(Posix.errno);
+                        }
+                    } else if ((size == 0 && channel.eof() != 0) || (size < 0 && size != SSH2.Error.AGAIN)) {
+                        warning("Channel is closed");
+                        return false;
+                    }
+                } while(size != SSH2.Error.AGAIN);
 
                 return true;
             } catch(Error e) {
