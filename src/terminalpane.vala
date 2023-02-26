@@ -177,7 +177,10 @@ namespace FooTerm {
                         size_t size = 0;
                         source.read_chars(buffer, out size);
 
-                        this.channel.write ((uint8[])buffer[0:size]);
+                        var res = this.channel.write ((uint8[])buffer[0:size]);
+                        if (res < 0) {
+                            warning("Channel write failed with %zu", res);
+                        }
                         return true;
                     } catch (Error e) {
                         GLib.warning("Failed to read from terminal : %s", e.message);
