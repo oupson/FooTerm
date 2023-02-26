@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="vte-2.91-gtk4" version="0.70.0"/>
+  <template class="FooTermTerminalPane" parent="GtkBox">
+    <child>
+      <object class="VteTerminal" id="terminal">
+        <property name="hexpand">true</property>
+      </object>
+    </child>
+  </template>
+</interface>

@@ -37,13 +37,33 @@
 	      "buildsystem": "meson",
 	      "config-opts": ["-Dgtk4=true", "-Dgtk3=false", "-Dsixel=true"],
 	      "sources": [
-		{
-		  "type": "archive",
-		  "url": "https://gitlab.gnome.org/GNOME/vte/-/archive/015ca4d2fdc57b625add7b23b0afa7193adc45a9/vte-015ca4d2fdc57b625add7b23b0afa7193adc45a9.tar.gz",
-		  "sha256": "ba918109936692fe555f1b28f428680ed4940a350709bcf908bdbf9a93498c08"
-		}
+	        {
+	          "type": "archive",
+	          "url": "https://gitlab.gnome.org/GNOME/vte/-/archive/015ca4d2fdc57b625add7b23b0afa7193adc45a9/vte-015ca4d2fdc57b625add7b23b0afa7193adc45a9.tar.gz",
+	          "sha256": "ba918109936692fe555f1b28f428680ed4940a350709bcf908bdbf9a93498c08"
+	        }
 	      ]
     	},
+    	{
+            "name" : "libssh2",
+            "buildsystem" : "cmake-ninja",
+            "config-opts" : [
+                "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+                "-DCMAKE_INSTALL_LIBDIR:PATH=/app/lib",
+                "-DBUILD_SHARED_LIBS:BOOL=ON"
+            ],
+            "cleanup" : [
+                "/share/doc"
+            ],
+            "sources" : [
+                {
+                    "type" : "git",
+                    "url" : "https://github.com/libssh2/libssh2.git",
+                    "tag" : "libssh2-1.10.0"
+                }
+            ]
+        },
+
         {
             "name" : "footerm",
             "builddir" : true,

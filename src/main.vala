@@ -19,6 +19,15 @@
  */
 
 int main (string[] args) {
+    var rc = SSH2.init (0);
+    if (rc != SSH2.Error.NONE) {
+        stdout.printf ("libssh2 initialization failed (%d)\n", rc);
+        return -1;
+    }
+
     var app = new Footerm.Application ();
-    return app.run (args);
+    var res = app.run(args);
+
+    SSH2.exit ();
+    return res;
 }

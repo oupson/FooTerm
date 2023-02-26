@@ -1,4 +1,4 @@
-/* window.vala
+/* Server.vala
  *
  * Copyright 2023 oupson
  *
@@ -18,25 +18,18 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Footerm {
-    [GtkTemplate (ui = "/fr/oupson/FooTerm/window.ui")]
-    public class Window : Adw.ApplicationWindow {
-        [GtkChild]
-        private unowned Gtk.Box pane_content;
+namespace FooTerm.Model {
+    public class Server {
+        public string hostname;
+        public ushort port;
+        public string username;
+        public string password;
 
-        public Window (Gtk.Application app) {
-            Object (application: app);
-        }
-
-        construct {
-            var new_pane = new FooTerm.NewPane();
-            ulong handler_id;
-            handler_id = new_pane.on_server_selected.connect((s) => {
-                new_pane.disconnect (handler_id);
-                pane_content.remove(new_pane);
-                pane_content.append(new FooTerm.TerminalPane(s));
-            });
-            pane_content.append(new_pane);
+        public Server(string hostname, ushort port, string username, string password) {
+            this.hostname = hostname;
+            this.port = port;
+            this.username = username;
+            this.password = password;
         }
     }
 }

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="Adw" version="1.0"/>
+  <requires lib="gtk" version="4.0"/>
+  <template class="FooTermNewPane" parent="GtkBox">
+    <child>
+      <object class="GtkStack" id="newpane_stack">
+        <child>
+          <object class="AdwClamp">
+            <child>
+              <object class="AdwPreferencesGroup" id="server_list">
+                <property name="margin-bottom">32</property>
+                <property name="margin-top">32</property>
+                <property name="margin-start">32</property>
+                <property name="margin-end">32</property>
+                <property name="title" translatable="yes">Servers</property>
+                <child type="header-suffix">
+                  <object class="GtkButton" id="newpane_add_button">
+                    <property name="valign">center</property>
+                    <property name="child">
+                      <object class="AdwButtonContent">
+                        <property name="icon-name">list-add-symbolic</property>
+                        <property name="label" translatable="yes">Add new</property>
+                      </object>
+                    </property>
+                    <style>
+                      <class name="flat"/>
+                    </style>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="AdwClamp">
+            <child>
+              <object class="FooTermNewServer" id="new_server"></object>
+            </child>
+          </object>
+        </child>"
+      </object>
+    </child>
+  </template>
+</interface>

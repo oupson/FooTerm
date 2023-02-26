@@ -2,7 +2,6 @@
 <interface>
   <requires lib="gtk" version="4.0"/>
   <requires lib="Adw" version="1.0"/>
-  <requires lib="vte-2.91-gtk4" version="0.70.0"/>
   <template class="FootermWindow" parent="AdwApplicationWindow">
     <property name="default-width">600</property>
     <property name="default-height">300</property>
@@ -20,8 +19,8 @@
           </object>
         </child>
         <child>
-          <object class="VteTerminal" id="terminal">
-            <property name="hexpand">true</property>
+          <object class="GtkBox" id="pane_content">
+
           </object>
         </child>
       </object>

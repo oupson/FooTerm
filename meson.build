@@ -7,7 +7,17 @@ project('footerm', ['c', 'vala'],
 i18n = import('i18n')
 gnome = import('gnome')
 
+metadata_dir = meson.project_source_root() / 'bindings'/ 'metadata'
+vapi_dir = meson.project_source_root() / 'bindings' / 'vapi'
 
+add_project_arguments([
+    # Make sure Meson can find custom VAPIs
+    '--vapidir', vapi_dir,
+    '--metadatadir', metadata_dir,
+  ],
+  language: 'vala'
+)
+add_project_arguments('-D_GNU_SOURCE', language: 'c')
 
 subdir('data')
 subdir('src')
