@@ -2,6 +2,7 @@ footerm_sources = [
   'main.vala',
   'application.vala',
   'window.vala',
+  'pane.vala',
   'newpane.vala',
   'newserver.vala',
   'terminalpane.vala',

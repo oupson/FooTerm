@@ -2,6 +2,7 @@
 <gresources>
   <gresource prefix="/fr/oupson/FooTerm">
     <file preprocess="xml-stripblanks">window.ui</file>
+    <file preprocess="xml-stripblanks">pane.ui</file>
     <file preprocess="xml-stripblanks">newpane.ui</file>
     <file preprocess="xml-stripblanks">terminalpane.ui</file>
     <file preprocess="xml-stripblanks">newserver.ui</file>

@@ -1,4 +1,4 @@
-/* window.vala
+/* pane.vala
  *
  * Copyright 2023 oupson
  *
@@ -18,25 +18,18 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace Footerm {
-    [GtkTemplate (ui = "/fr/oupson/FooTerm/window.ui")]
-    public class Window : Adw.ApplicationWindow {
-        [GtkChild]
-        private unowned Adw.TabView view;
-
-        public Window (Gtk.Application app) {
-            Object (application: app);
-        }
-
+namespace FooTerm {
+    [GtkTemplate (ui = "/fr/oupson/FooTerm/pane.ui")]
+    public class Pane : Gtk.Box {
         construct {
-            var action = new SimpleAction("new_tab", null);
-            action.activate.connect (() => {
-                var a = view.append (new FooTerm.Pane());
-                a.set_title ("New Pane");
+            var new_pane = new FooTerm.NewPane();
+            ulong handler_id;
+            handler_id = new_pane.on_server_selected.connect((s) => {
+                new_pane.disconnect (handler_id);
+                this.remove(new_pane);
+                this.append(new FooTerm.TerminalPane(s));
             });
-            this.add_action (action);
-            var a = view.append (new FooTerm.Pane());
-            a.set_title ("New Pane");
+            this.append(new_pane);
         }
     }
 }
