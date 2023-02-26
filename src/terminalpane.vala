@@ -145,48 +145,52 @@ namespace FooTerm {
                 slave_channel.set_encoding (null);
                 slave_channel.set_buffered (false);
 
-                sock_channel.add_watch (GLib.IOCondition.IN, (source, condition) => {
-                    if (condition == IOCondition.HUP) {
-		                print ("The connection has been broken.\n");
-		                return false;
-	                }
+                sock_channel.add_watch (GLib.IOCondition.IN, this.on_ssh_event);
+                slave_channel.add_watch (GLib.IOCondition.IN, this.on_slave_event);
+            }
+        }
 
-                    try {
-                        var buffer = new uint8[1024];
-                        var size = this.channel.read(buffer);
+        private bool on_ssh_event(GLib.IOChannel source, GLib.IOCondition condition) {
+            if (condition == IOCondition.HUP) {
+                print ("The connection has been broken.\n");
+                return false;
+            }
 
-                        if (Posix.write(this.slave_pty, buffer, size) < 0) {
-                            throw GLib.IOError.from_errno(Posix.errno);
-                        }
+            try {
+                var buffer = new uint8[1024];
+                var size = this.channel.read(buffer);
+                debug("Got %zu from ssh", size);
 
-                        return true;
-                    } catch(Error e) {
-                        GLib.warning("Failed to read from ssh : %s", e.message);
-                        return false;
-                    }
-                });
+                if (Posix.write(this.slave_pty, buffer, size) < 0) {
+                    throw GLib.IOError.from_errno(Posix.errno);
+                }
 
-                slave_channel.add_watch (GLib.IOCondition.IN, (source, condition) => {
-                    if (condition == IOCondition.HUP) {
-                        print ("The connection has been broken.\n");
-                        return false;
-                    }
+                return true;
+            } catch(Error e) {
+                GLib.warning("Failed to read from ssh : %s", e.message);
+                return false;
+            }
+        }
 
-                    try {
-                        var buffer = new char[1024];
-                        size_t size = 0;
-                        source.read_chars(buffer, out size);
+        private bool on_slave_event(GLib.IOChannel source, GLib.IOCondition condition) {
+            if (condition == IOCondition.HUP) {
+                print ("The connection has been broken.\n");
+                return false;
+            }
 
-                        var res = this.channel.write ((uint8[])buffer[0:size]);
-                        if (res < 0) {
-                            warning("Channel write failed with %zu", res);
-                        }
-                        return true;
-                    } catch (Error e) {
-                        GLib.warning("Failed to read from terminal : %s", e.message);
-                        return false;
-                    }
-                });
+            try {
+                var buffer = new char[1024];
+                size_t size = 0;
+                source.read_chars(buffer, out size);
+
+                var res = this.channel.write ((uint8[])buffer[0:size]);
+                if (res < 0) {
+                    warning("Channel write failed with %zu", res);
+                }
+                return true;
+            } catch (Error e) {
+                GLib.warning("Failed to read from terminal : %s", e.message);
+                return false;
             }
         }
     }
