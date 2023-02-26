@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace FooTerm.Model {
+namespace Footerm.Model {
     public class Server {
         public string hostname;
         public ushort port;

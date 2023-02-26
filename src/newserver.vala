@@ -18,10 +18,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace FooTerm {
+namespace Footerm {
     [GtkTemplate (ui = "/fr/oupson/FooTerm/newserver.ui")]
     public class NewServer : Gtk.Box {
-         public signal void on_new_server(FooTerm.Model.Server server);
+        public signal void on_new_server(Footerm.Model.Server server);
 
         [GtkChild]
         private unowned Adw.EntryRow hostname_entry;
@@ -52,7 +52,7 @@ namespace FooTerm {
                 // Port is invalid
             }
 
-            this.on_new_server(new FooTerm.Model.Server(hostname, (ushort)port, username, password));
+            this.on_new_server(new Footerm.Model.Server(hostname, (ushort)port, username, password));
         }
     }
 }

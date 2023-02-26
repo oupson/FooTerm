@@ -1,5 +1,5 @@
 <interface>
-  <template class="FooTermPane" parent="GtkBox">
+  <template class="FootermPane" parent="GtkBox">
 
   </template>
 </interface>

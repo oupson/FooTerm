@@ -31,11 +31,11 @@ namespace Footerm {
         construct {
             var action = new SimpleAction("new_tab", null);
             action.activate.connect (() => {
-                var a = view.append (new FooTerm.Pane());
+                var a = view.append (new Footerm.Pane());
                 a.set_title ("New Pane");
             });
             this.add_action (action);
-            var a = view.append (new FooTerm.Pane());
+            var a = view.append (new Footerm.Pane());
             a.set_title ("New Pane");
         }
     }

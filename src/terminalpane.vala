@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace FooTerm {
+namespace Footerm {
     [GtkTemplate (ui = "/fr/oupson/FooTerm/terminalpane.ui")]
     public class TerminalPane : Gtk.Box {
         [GtkChild]
@@ -29,9 +29,9 @@ namespace FooTerm {
         private Socket socket;
         private int slave_pty;
 
-        private FooTerm.Model.Server server;
+        private Footerm.Model.Server server;
 
-        public TerminalPane(FooTerm.Model.Server server) {
+        public TerminalPane(Footerm.Model.Server server) {
             this.server = server;
             this.terminal.set_enable_sixel (true);
             this.connect_to_server();

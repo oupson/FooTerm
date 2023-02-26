@@ -2,7 +2,7 @@
 <interface>
   <requires lib="Adw" version="1.0"/>
   <requires lib="gtk" version="4.0"/>
-  <template class="FooTermNewPane" parent="GtkBox">
+  <template class="FootermNewPane" parent="GtkBox">
     <child>
       <object class="GtkStack" id="newpane_stack">
         <child>
@@ -35,7 +35,7 @@
         <child>
           <object class="AdwClamp">
             <child>
-              <object class="FooTermNewServer" id="new_server"></object>
+              <object class="FootermNewServer" id="new_server"></object>
             </child>
           </object>
         </child>"

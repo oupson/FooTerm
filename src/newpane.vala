@@ -18,14 +18,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace FooTerm {
+namespace Footerm {
     [GtkTemplate (ui = "/fr/oupson/FooTerm/newpane.ui")]
     public class NewPane : Gtk.Box {
         [GtkChild]
         private unowned Adw.PreferencesGroup server_list;
 
         [GtkChild]
-        private unowned FooTerm.NewServer new_server;
+        private unowned Footerm.NewServer new_server;
 
         [GtkChild]
         private unowned Gtk.Stack newpane_stack;
@@ -33,7 +33,7 @@ namespace FooTerm {
         [GtkChild]
         private unowned Gtk.Button newpane_add_button;
 
-        public signal void on_server_selected(FooTerm.Model.Server server);
+        public signal void on_server_selected(Footerm.Model.Server server);
 
         construct {
             this.new_server.on_new_server.connect((s) => {

@@ -18,16 +18,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-namespace FooTerm {
+namespace Footerm {
     [GtkTemplate (ui = "/fr/oupson/FooTerm/pane.ui")]
     public class Pane : Gtk.Box {
         construct {
-            var new_pane = new FooTerm.NewPane();
+            var new_pane = new Footerm.NewPane();
             ulong handler_id;
             handler_id = new_pane.on_server_selected.connect((s) => {
                 new_pane.disconnect (handler_id);
                 this.remove(new_pane);
-                this.append(new FooTerm.TerminalPane(s));
+                this.append(new Footerm.TerminalPane(s));
             });
             this.append(new_pane);
         }
