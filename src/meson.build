@@ -12,8 +12,8 @@ footerm_deps = [
   dependency('gtk4'),
   dependency('libadwaita-1'),
   dependency('vte-2.91-gtk4', version: '>= 0.70.0'),
-  dependency('json-glib-1.0', version: '>= 1.2.0'),
   dependency('libssh2'),
+  dependency('sqlite3')
 ]
 
 subdir('model')

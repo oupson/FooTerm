@@ -19,14 +19,33 @@
  */
 
 namespace Footerm.Services {
+    public errordomain ConfigError {
+        DATABASE
+    }
+
     public class Config {
         private static Config instance = null;
 
-        public static Config get_instance() {
+        public static Config get_instance() throws Footerm.Services.ConfigError {
             if (Config.instance == null) {
                 Config.instance = new Config();
             }
             return Config.instance;
+        }
+
+        private Sqlite.Database db;
+
+        public Config() throws Footerm.Services.ConfigError {
+            var config_dir = GLib.File.new_for_path(GLib.Environment.get_user_config_dir());
+            var config_db_file = config_dir.get_child("config.db");
+
+            debug("Database path is %s", config_db_file.get_path());
+            int ec = Sqlite.Database.open (config_db_file.get_path(), out this.db);
+            if (ec != Sqlite.OK) {
+                throw new ConfigError.DATABASE(@"Can't open database: $(db.errcode ()): $(db.errmsg ())");
+            }
+
+            debug("Opened database");
         }
     }
 }

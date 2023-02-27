@@ -51,18 +51,7 @@ namespace Footerm {
             });
 
             try {
-                var config_dir = GLib.File.new_for_path(GLib.Environment.get_user_config_dir());
-                var server_files = config_dir.get_child("servers.json");
-
-                if (server_files.query_exists()) {
-                    var parser = new Json.Parser();
-
-                    parser.load_from_file(server_files.get_path());
-
-                    // TODO
-                } else {
-                    GLib.debug("Server file does not exist");
-                }
+                var config = Footerm.Services.Config.get_instance();
             } catch (Error e) {
                 GLib.warning("Failed to read server list : %s", e.message);
             }
