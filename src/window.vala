@@ -33,6 +33,7 @@ namespace Footerm {
             action.activate.connect (() => {
                 var a = view.append (new Footerm.Pane());
                 a.set_title ("New Pane");
+                view.set_selected_page (a);
             });
             this.add_action (action);
             var a = view.append (new Footerm.Pane());
