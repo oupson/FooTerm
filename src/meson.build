@@ -17,6 +17,7 @@ footerm_deps = [
 ]
 
 subdir('model')
+subdir('services')
 
 footerm_sources += gnome.compile_resources('footerm-resources',
   'footerm.gresource.xml',
