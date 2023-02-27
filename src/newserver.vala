@@ -19,7 +19,7 @@
  */
 
 namespace Footerm {
-    [GtkTemplate (ui = "/fr/oupson/FooTerm/newserver.ui")]
+    [GtkTemplate(ui = "/fr/oupson/FooTerm/newserver.ui")]
     public class NewServer : Gtk.Box {
         public signal void on_new_server(Footerm.Model.Server server);
 
@@ -39,7 +39,7 @@ namespace Footerm {
         private unowned Gtk.Button add_server_button;
 
         construct {
-            add_server_button.clicked.connect (this.on_add_button_clicked);
+            add_server_button.clicked.connect(this.on_add_button_clicked);
         }
 
         private void on_add_button_clicked() {
@@ -52,7 +52,7 @@ namespace Footerm {
                 // Port is invalid
             }
 
-            this.on_new_server(new Footerm.Model.Server(hostname, (ushort)port, username, password));
+            // this.on_new_server(new Footerm.Model.Server(hostname, (ushort)port, username, password));
         }
     }
 }

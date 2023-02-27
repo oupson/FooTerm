@@ -19,7 +19,7 @@
  */
 
 namespace Footerm {
-    [GtkTemplate (ui = "/fr/oupson/FooTerm/terminalpane.ui")]
+    [GtkTemplate(ui = "/fr/oupson/FooTerm/terminalpane.ui")]
     public class TerminalPane : Gtk.Box {
         [GtkChild]
         private unowned Vte.Terminal terminal;
@@ -33,7 +33,7 @@ namespace Footerm {
 
         public TerminalPane(Footerm.Model.Server server) {
             this.server = server;
-            this.terminal.set_enable_sixel (true);
+            this.terminal.set_enable_sixel(true);
             this.connect_to_server();
             this.terminal.char_size_changed.connect(() => {
                 int rows = 0;
@@ -52,14 +52,14 @@ namespace Footerm {
         }
 
         private void connect_to_server() throws GLib.IOError, GLib.Error {
-	        var addrs = new NetworkAddress(this.server.hostname, this.server.port);
+            var addrs = new NetworkAddress(this.server.hostname, this.server.port);
             var addr = addrs.enumerate().next();
-            this.socket = new Socket (addr.get_family(), SocketType.STREAM, SocketProtocol.TCP);
-	        socket.connect(addr, null);
+            this.socket = new Socket(addr.get_family(), SocketType.STREAM, SocketProtocol.TCP);
+            socket.connect(addr, null);
 
             var sock = socket.get_fd(); // TODO
 
-            this.session = SSH2.Session.create<bool>();
+            this.session = SSH2.Session.create<bool> ();
             if (session.handshake(sock) != SSH2.Error.NONE) {
                 stderr.printf("Failure establishing SSH session\n");
                 return;
@@ -67,14 +67,15 @@ namespace Footerm {
 
             var fingerprint = session.get_host_key_hash(SSH2.HashType.SHA1);
             stdout.printf("Fingerprint: ");
-            for(var i = 0; i < 20; i++) {
+            for (var i = 0; i < 20; i++) {
                 stdout.printf("%02X ", fingerprint[i]);
             }
             stdout.printf("\n");
 
-            if (session.auth_password(this.server.username, this.server.password) != SSH2.Error.NONE) {
+            // TODO QUERY PASSWORD FROM libsecret
+            if (session.auth_password(this.server.username, null) != SSH2.Error.NONE) {
                 stdout.printf("\tAuthentication by password failed!\n");
-                session.disconnect( "Normal Shutdown, Thank you for playing");
+                session.disconnect("Normal Shutdown, Thank you for playing");
                 session = null;
                 Posix.close(sock);
                 return;
@@ -87,49 +88,49 @@ namespace Footerm {
                 stderr.printf("Unable to open a session\n");
             } else {
                 if (channel.request_pty("xterm-256color".data) != SSH2.Error.NONE) {
-                   stderr.printf("Failed requesting pty\n");
-                   session.disconnect( "Normal Shutdown, Thank you for playing");
-                   session = null;
-                   Posix.close(sock);
+                    stderr.printf("Failed requesting pty\n");
+                    session.disconnect("Normal Shutdown, Thank you for playing");
+                    session = null;
+                    Posix.close(sock);
                 }
 
-                channel.set_env ("TERM", "xterm-256color");
+                channel.set_env("TERM", "xterm-256color");
 
-                 if (channel.start_shell() != SSH2.Error.NONE) {
-                   stderr.printf("Unable to request shell on allocated pty\n");
-                   session.disconnect( "Normal Shutdown, Thank you for playing");
-                   session = null;
-                   Posix.close(sock);
+                if (channel.start_shell() != SSH2.Error.NONE) {
+                    stderr.printf("Unable to request shell on allocated pty\n");
+                    session.disconnect("Normal Shutdown, Thank you for playing");
+                    session = null;
+                    Posix.close(sock);
                 }
 
                 var master_pty = Posix.posix_openpt(Posix.O_RDWR);
                 if (master_pty == -1) {
-                    throw GLib.IOError.from_errno (Posix.errno);
+                    throw GLib.IOError.from_errno(Posix.errno);
                 }
 
                 var settings = Posix.termios();
-                Posix.cfmakeraw (ref settings);
+                Posix.cfmakeraw(ref settings);
 
-                if (Posix.tcsetattr (master_pty, Posix.TCSANOW, settings)  == -1) {
-                    throw GLib.IOError.from_errno (Posix.errno);
+                if (Posix.tcsetattr(master_pty, Posix.TCSANOW, settings) == -1) {
+                    throw GLib.IOError.from_errno(Posix.errno);
                 }
 
                 if (Posix.grantpt(master_pty) == -1) {
-                    throw GLib.IOError.from_errno (Posix.errno);
+                    throw GLib.IOError.from_errno(Posix.errno);
                 }
 
                 if (Posix.unlockpt(master_pty) == -1) {
-                    throw GLib.IOError.from_errno (Posix.errno);
+                    throw GLib.IOError.from_errno(Posix.errno);
                 }
 
                 var pts_name = Posix.ptsname(master_pty);
                 if (pts_name == null) {
-                    throw GLib.IOError.from_errno (Posix.errno);
+                    throw GLib.IOError.from_errno(Posix.errno);
                 }
 
                 this.slave_pty = Posix.open(pts_name, Posix.O_RDWR);
                 if (this.slave_pty < 0) {
-                    throw GLib.IOError.from_errno (Posix.errno);
+                    throw GLib.IOError.from_errno(Posix.errno);
                 }
 
                 var vte_pty = new Vte.Pty.foreign_sync(master_pty, null);
@@ -138,22 +139,22 @@ namespace Footerm {
                 session.blocking = false;
 
                 var sock_channel = new GLib.IOChannel.unix_new(sock);
-                sock_channel.set_encoding (null);
-                sock_channel.set_buffered (false);
-                sock_channel.set_close_on_unref (false);
+                sock_channel.set_encoding(null);
+                sock_channel.set_buffered(false);
+                sock_channel.set_close_on_unref(false);
 
                 var slave_channel = new GLib.IOChannel.unix_new(slave_pty);
-                slave_channel.set_encoding (null);
-                slave_channel.set_buffered (false);
+                slave_channel.set_encoding(null);
+                slave_channel.set_buffered(false);
 
-                sock_channel.add_watch (GLib.IOCondition.IN, this.on_ssh_event);
-                slave_channel.add_watch (GLib.IOCondition.IN, this.on_slave_event);
+                sock_channel.add_watch(GLib.IOCondition.IN, this.on_ssh_event);
+                slave_channel.add_watch(GLib.IOCondition.IN, this.on_slave_event);
             }
         }
 
         private bool on_ssh_event(GLib.IOChannel source, GLib.IOCondition condition) {
             if (condition == IOCondition.HUP) {
-                print ("The connection has been broken.\n");
+                print("The connection has been broken.\n");
                 return false;
             }
 
@@ -171,10 +172,10 @@ namespace Footerm {
                         warning("Channel is closed");
                         return false;
                     }
-                } while(size != SSH2.Error.AGAIN);
+                } while (size != SSH2.Error.AGAIN);
 
                 return true;
-            } catch(Error e) {
+            } catch (Error e) {
                 GLib.warning("Failed to read from ssh : %s", e.message);
                 return false;
             }
@@ -182,7 +183,7 @@ namespace Footerm {
 
         private bool on_slave_event(GLib.IOChannel source, GLib.IOCondition condition) {
             if (condition == IOCondition.HUP) {
-                print ("The connection has been broken.\n");
+                print("The connection has been broken.\n");
                 return false;
             }
 
@@ -191,7 +192,7 @@ namespace Footerm {
                 size_t size = 0;
                 source.read_chars(buffer, out size);
 
-                var res = this.channel.write ((uint8[])buffer[0:size]);
+                var res = this.channel.write((uint8[]) buffer[0 : size]);
                 if (res < 0) {
                     warning("Channel write failed with %zu", res);
                 }

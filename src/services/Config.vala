@@ -107,5 +107,22 @@ namespace Footerm.Services {
 
             return true;
         }
+
+        public List<Footerm.Model.Server> get_server_list() throws ConfigError {
+            List<Footerm.Model.Server> list = new List<Footerm.Model.Server> ();
+
+            var stm_str = "SELECT (serverId, serverName, serverHostName, serverPort) FROM SERVER";
+            Sqlite.Statement stm;
+            var ec = this.db.prepare_v2(stm_str, stm_str.length, out stm);
+            if (ec != Sqlite.OK) {
+                throw new ConfigError.DATABASE(@"Can't fetch server list: $(db.errcode ()): $(db.errmsg ())");
+            }
+
+            while (stm.step() == Sqlite.ROW) {
+                list.append(new Footerm.Model.Server(stm.column_text(0), stm.column_text(1), (ushort) stm.column_int(2), stm.column_text(3)));
+            }
+
+            return list;
+        }
     }
 }

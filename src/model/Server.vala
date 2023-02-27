@@ -20,16 +20,16 @@
 
 namespace Footerm.Model {
     public class Server {
+        public string name;
         public string hostname;
         public ushort port;
         public string username;
-        public string password;
 
-        public Server(string hostname, ushort port, string username, string password) {
+        public Server(string name, string hostname, ushort port, string username) {
+            this.name = name;
             this.hostname = hostname;
             this.port = port;
             this.username = username;
-            this.password = password;
         }
     }
 }
