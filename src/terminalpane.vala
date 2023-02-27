@@ -52,9 +52,10 @@ namespace Footerm {
         }
 
         private void connect_to_server() throws GLib.IOError, GLib.Error {
-	        this.socket = new Socket (SocketFamily.IPV4, SocketType.STREAM, SocketProtocol.TCP);
 	        var addrs = new NetworkAddress(this.server.hostname, this.server.port);
-	        socket.connect(addrs.enumerate().next(), null);
+            var addr = addrs.enumerate().next();
+            this.socket = new Socket (addr.get_family(), SocketType.STREAM, SocketProtocol.TCP);
+	        socket.connect(addr, null);
 
             var sock = socket.get_fd(); // TODO
 
