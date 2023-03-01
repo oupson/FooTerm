@@ -26,7 +26,7 @@ namespace Footerm {
 
         private SSH2.Session<bool>? session;
         private SSH2.Channel? channel;
-        private Socket socket;
+        private SocketConnection socket;
         private int slave_pty;
 
         private Footerm.Model.Server server;
@@ -60,13 +60,11 @@ namespace Footerm {
         private async void connect_to_server() throws GLib.IOError, GLib.Error {
             var addrs = new NetworkAddress(this.server.hostname, this.server.port);
             var addr = addrs.enumerate().next();
-            this.socket = new Socket(addr.get_family(), SocketType.STREAM, SocketProtocol.TCP);
-            socket.connect(addr, null);
-
-            var sock = socket.get_fd(); // TODO
+            var client = new SocketClient();
+            this.socket = client.connect(addr);
 
             this.session = SSH2.Session.create<bool> ();
-            if (session.handshake(sock) != SSH2.Error.NONE) {
+            if (session.handshake(this.socket.get_socket().get_fd()) != SSH2.Error.NONE) {
                 stderr.printf("Failure establishing SSH session\n");
                 return;
             }
@@ -78,7 +76,6 @@ namespace Footerm {
             }
             stdout.printf("\n");
 
-            // TODO QUERY PASSWORD FROM libsecret
             var secrets = Footerm.Services.Secrets.get_instance();
             var password = yield secrets.get_password(this.server);
 
@@ -86,7 +83,7 @@ namespace Footerm {
                 stdout.printf("\tAuthentication by password failed!\n");
                 session.disconnect("Normal Shutdown, Thank you for playing");
                 session = null;
-                Posix.close(sock);
+                this.socket.close();
                 return;
             } else {
                 stdout.printf("\tAuthentication by password succeeded.\n");
@@ -100,7 +97,7 @@ namespace Footerm {
                     stderr.printf("Failed requesting pty\n");
                     session.disconnect("Normal Shutdown, Thank you for playing");
                     session = null;
-                    Posix.close(sock);
+                    this.socket.close();
                 }
 
                 channel.set_env("TERM", "xterm-256color");
@@ -109,7 +106,7 @@ namespace Footerm {
                     stderr.printf("Unable to request shell on allocated pty\n");
                     session.disconnect("Normal Shutdown, Thank you for playing");
                     session = null;
-                    Posix.close(sock);
+                    this.socket.close();
                 }
 
                 var master_pty = Posix.posix_openpt(Posix.O_RDWR);
@@ -147,21 +144,19 @@ namespace Footerm {
 
                 session.blocking = false;
 
-                var sock_channel = new GLib.IOChannel.unix_new(sock);
-                sock_channel.set_encoding(null);
-                sock_channel.set_buffered(false);
-                sock_channel.set_close_on_unref(false);
+                var inner_socket = socket.get_socket();
+                var source = inner_socket.create_source(GLib.IOCondition.IN, null);
+                source.set_callback(this.on_ssh_event);
+                source.attach(null);
 
                 var slave_channel = new GLib.IOChannel.unix_new(slave_pty);
                 slave_channel.set_encoding(null);
                 slave_channel.set_buffered(false);
-
-                sock_channel.add_watch(GLib.IOCondition.IN, this.on_ssh_event);
                 slave_channel.add_watch(GLib.IOCondition.IN, this.on_slave_event);
             }
         }
 
-        private bool on_ssh_event(GLib.IOChannel source, GLib.IOCondition condition) {
+        private bool on_ssh_event(Socket source, GLib.IOCondition condition) {
             if (condition == IOCondition.HUP) {
                 print("The connection has been broken.\n");
                 return false;
