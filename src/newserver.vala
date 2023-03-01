@@ -22,6 +22,8 @@ namespace Footerm {
     [GtkTemplate(ui = "/fr/oupson/FooTerm/newserver.ui")]
     public class NewServer : Gtk.Box {
         public signal void on_new_server(Footerm.Model.Server server);
+        [GtkChild]
+        private unowned Adw.EntryRow name_entry;
 
         [GtkChild]
         private unowned Adw.EntryRow hostname_entry;
@@ -42,7 +44,8 @@ namespace Footerm {
             add_server_button.clicked.connect(this.on_add_button_clicked);
         }
 
-        private void on_add_button_clicked() {
+        private async void on_add_button_clicked() {
+            var name = this.name_entry.get_text();
             var hostname = this.hostname_entry.get_text();
             var port = int.parse(this.port_entry.get_text());
             var username = this.username_entry.get_text();
@@ -52,7 +55,11 @@ namespace Footerm {
                 // Port is invalid
             }
 
-            // this.on_new_server(new Footerm.Model.Server(hostname, (ushort)port, username, password));
+            var server = new Footerm.Model.Server(null, name, hostname, (ushort)port, username);
+            var config_service = Footerm.Services.Config.get_instance();
+            yield config_service.save_server(server, password);
+
+            this.on_new_server(server);
         }
     }
 }

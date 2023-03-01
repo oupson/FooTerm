@@ -34,7 +34,13 @@ namespace Footerm {
         public TerminalPane(Footerm.Model.Server server) {
             this.server = server;
             this.terminal.set_enable_sixel(true);
-            this.connect_to_server();
+            this.connect_to_server.begin((obj, res) => {
+                try {
+                    this.connect_to_server.end(res);
+                } catch (Error e) {
+                    warning("Failed to connect to the server : %s", e.message);
+                }
+            });
             this.terminal.char_size_changed.connect(() => {
                 int rows = 0;
                 int columns = 0;
@@ -51,7 +57,7 @@ namespace Footerm {
             // stdout.printf("all done!\n");)
         }
 
-        private void connect_to_server() throws GLib.IOError, GLib.Error {
+        private async void connect_to_server() throws GLib.IOError, GLib.Error {
             var addrs = new NetworkAddress(this.server.hostname, this.server.port);
             var addr = addrs.enumerate().next();
             this.socket = new Socket(addr.get_family(), SocketType.STREAM, SocketProtocol.TCP);
@@ -73,7 +79,10 @@ namespace Footerm {
             stdout.printf("\n");
 
             // TODO QUERY PASSWORD FROM libsecret
-            if (session.auth_password(this.server.username, null) != SSH2.Error.NONE) {
+            var secrets = Footerm.Services.Secrets.get_instance();
+            var password = yield secrets.get_password(this.server);
+
+            if (session.auth_password(this.server.username, password) != SSH2.Error.NONE) {
                 stdout.printf("\tAuthentication by password failed!\n");
                 session.disconnect("Normal Shutdown, Thank you for playing");
                 session = null;

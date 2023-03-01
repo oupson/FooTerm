@@ -10,6 +10,11 @@
     <child>
       <object class="AdwPreferencesGroup">
         <child>
+          <object class="AdwEntryRow" id="name_entry">
+            <property name="title" translatable="yes">Name</property>
+          </object>
+        </child>
+        <child>
           <object class="AdwEntryRow" id="hostname_entry">
             <property name="title" translatable="yes">Hostname</property>
           </object>

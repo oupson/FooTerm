@@ -1,3 +1,4 @@
 footerm_sources += files(
-	'Config.vala'
+	'Config.vala',
+	'Secrets.vala'
 )

@@ -33,27 +33,38 @@ namespace Footerm {
         [GtkChild]
         private unowned Gtk.Button newpane_add_button;
 
-        public signal void on_server_selected(Footerm.Model.Server server);
+        public signal void on_server_selected (Footerm.Model.Server server);
 
         construct {
-            this.new_server.on_new_server.connect((s) => {
-                this.newpane_stack.set_visible_child(server_list.get_parent());
-                var action_row = new Adw.ActionRow();
-                action_row.set_title(s.hostname);
-                action_row.set_activatable(true);
-                action_row.activated.connect(() => {
-                    this.on_server_selected(s);
+            this.new_server.on_new_server.connect ((s) => {
+                this.newpane_stack.set_visible_child (server_list.get_parent ());
+                var action_row = new Adw.ActionRow ();
+                action_row.set_title (s.hostname);
+                action_row.set_activatable (true);
+                action_row.activated.connect (() => {
+                    this.on_server_selected (s);
                 });
-                server_list.add(action_row);
+                server_list.add (action_row);
             });
             this.newpane_add_button.clicked.connect (() => {
-                this.newpane_stack.set_visible_child(new_server.get_parent());
+                this.newpane_stack.set_visible_child (new_server.get_parent ());
             });
 
             try {
-                var config = Footerm.Services.Config.get_instance();
+                var config = Footerm.Services.Config.get_instance ();
+
+                var stored_server_list = config.get_server_list ();
+                foreach (var server in stored_server_list) {
+                    var action_row = new Adw.ActionRow ();
+                    action_row.set_title (server.name);
+                    action_row.set_activatable (true);
+                    action_row.activated.connect (() => {
+                        this.on_server_selected (server);
+                    });
+                    server_list.add (action_row);
+                }
             } catch (Error e) {
-                GLib.warning("Failed to read server list : %s", e.message);
+                GLib.warning ("Failed to read server list : %s", e.message);
             }
         }
     }

@@ -29,14 +29,14 @@ namespace Footerm {
         }
 
         construct {
-            var action = new SimpleAction("new_tab", null);
+            var action = new SimpleAction ("new_tab", null);
             action.activate.connect (() => {
-                var a = view.append (new Footerm.Pane());
+                var a = view.append (new Footerm.Pane ());
                 a.set_title ("New Pane");
                 view.set_selected_page (a);
             });
             this.add_action (action);
-            var a = view.append (new Footerm.Pane());
+            var a = view.append (new Footerm.Pane ());
             a.set_title ("New Pane");
         }
     }

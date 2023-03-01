@@ -111,7 +111,7 @@ namespace Footerm.Services {
         public List<Footerm.Model.Server> get_server_list() throws ConfigError {
             List<Footerm.Model.Server> list = new List<Footerm.Model.Server> ();
 
-            var stm_str = "SELECT (serverId, serverName, serverHostName, serverPort) FROM SERVER";
+            var stm_str = "SELECT serverId, serverName, serverHostName, serverPort, serverUsername FROM SERVER;";
             Sqlite.Statement stm;
             var ec = this.db.prepare_v2(stm_str, stm_str.length, out stm);
             if (ec != Sqlite.OK) {
@@ -119,10 +119,48 @@ namespace Footerm.Services {
             }
 
             while (stm.step() == Sqlite.ROW) {
-                list.append(new Footerm.Model.Server(stm.column_text(0), stm.column_text(1), (ushort) stm.column_int(2), stm.column_text(3)));
+                list.append(new Footerm.Model.Server(stm.column_int(0), stm.column_text(1), stm.column_text(2), (ushort) stm.column_int(3), stm.column_text(4)));
             }
 
             return list;
         }
+
+        public async void save_server(Footerm.Model.Server server, string password) throws ConfigError, SecretError, Error {
+            var secrets = Secrets.get_instance();
+            yield secrets.store_password(server, password);
+
+            var stm_str = "INSERT INTO SERVER (serverName, serverHostName, serverPort, serverUsername, serverAuthentificationType) VALUES(?, ?, ?, ?, 'password')";
+            Sqlite.Statement stm;
+            var ec = this.db.prepare_v2(stm_str, stm_str.length, out stm);
+            if (ec != Sqlite.OK) {
+                throw new ConfigError.DATABASE(@"Can't insert server: $(db.errcode ()): $(db.errmsg ())");
+            }
+
+            ec = stm.bind_text(1, server.name);
+            if (ec != Sqlite.OK) {
+                throw new ConfigError.DATABASE(@"Can't insert server: $(db.errcode ()): $(db.errmsg ())");
+            }
+            ec = stm.bind_text(2, server.hostname);
+            if (ec != Sqlite.OK) {
+                throw new ConfigError.DATABASE(@"Can't insert server: $(db.errcode ()): $(db.errmsg ())");
+            }
+            ec = stm.bind_int(3, server.port);
+            if (ec != Sqlite.OK) {
+                throw new ConfigError.DATABASE(@"Can't insert server: $(db.errcode ()): $(db.errmsg ())");
+            }
+            ec = stm.bind_text(4, server.username);
+            if (ec != Sqlite.OK) {
+                throw new ConfigError.DATABASE(@"Can't insert server: $(db.errcode ()): $(db.errmsg ())");
+            }
+
+            ec = stm.step();
+            stm.reset();
+
+            if (ec != Sqlite.DONE) {
+                throw new ConfigError.DATABASE(@"Can't insert server: $(db.errcode ()): $(db.errmsg ())");
+            }
+
+            server.id = (int)this.db.last_insert_rowid();
+         }
     }
 }

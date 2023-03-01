@@ -20,12 +20,14 @@
 
 namespace Footerm.Model {
     public class Server {
+        public int? id;
         public string name;
         public string hostname;
         public ushort port;
         public string username;
 
-        public Server(string name, string hostname, ushort port, string username) {
+        public Server(int? id, string name, string hostname, ushort port, string username) {
+            this.id = id;
             this.name = name;
             this.hostname = hostname;
             this.port = port;
