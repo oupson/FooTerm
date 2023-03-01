@@ -13,7 +13,8 @@ footerm_deps = [
   dependency('libadwaita-1'),
   dependency('vte-2.91-gtk4', version: '>= 0.70.0'),
   dependency('libssh2'),
-  dependency('sqlite3')
+  dependency('sqlite3'),
+  dependency('libsecret-1')
 ]
 
 subdir('model')
