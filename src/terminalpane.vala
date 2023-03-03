@@ -35,7 +35,7 @@ namespace Footerm {
             this.configure_terminal();
         }
 
-        public void connect(Footerm.Model.Server server) {
+        public void connect_to_server_async(Footerm.Model.Server server) {
             this.server = server;
 
             this.connect_to_server.begin((obj, res) => {

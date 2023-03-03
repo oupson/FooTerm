@@ -33,7 +33,7 @@ namespace Footerm {
         construct {
             this.new_pane.on_server_selected.connect ((s) => {
                 this.footerm_pane_stack.set_visible_child (this.terminal_pane);
-                this.terminal_pane.connect (s);
+                this.terminal_pane.connect_to_server_async (s);
             });
         }
 
