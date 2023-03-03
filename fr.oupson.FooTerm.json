@@ -80,7 +80,8 @@
             "sources" : [
                 {
                     "type" : "git",
-                    "url" : "https://github.com/oupson/FooTerm.git"
+                    "url" : "https://github.com/oupson/FooTerm.git",
+                    "branch": "main"
                 }
             ]
         }
