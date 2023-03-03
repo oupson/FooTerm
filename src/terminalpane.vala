@@ -31,19 +31,13 @@ namespace Footerm {
 
         private Footerm.Model.Server? server;
 
-        public TerminalPane() {
-
-            this.terminal.char_size_changed.connect(() => {
-                int rows = 0;
-                int columns = 0;
-                this.terminal.get_pty().get_size(out rows, out columns);
-                this.channel.request_pty_size(columns, rows);
-            });
+        construct {
+            this.configure_terminal();
         }
 
         public void connect(Footerm.Model.Server server) {
             this.server = server;
-            this.terminal.set_enable_sixel(true);
+
             this.connect_to_server.begin((obj, res) => {
                 try {
                     this.connect_to_server.end(res);
@@ -51,11 +45,18 @@ namespace Footerm {
                     warning("Failed to connect to the server : %s", e.message);
                 }
             });
+        }
+
+        private void configure_terminal() {
+            this.terminal.set_enable_sixel(true);
             this.terminal.char_size_changed.connect(() => {
-                int rows = 0;
-                int columns = 0;
-                this.terminal.get_pty().get_size(out rows, out columns);
-                this.channel.request_pty_size(columns, rows);
+                var pty = this.terminal.get_pty();
+                if (pty != null && this.channel != null) {
+                    int rows = 0;
+                    int columns = 0;
+                    pty.get_size(out rows, out columns);
+                    this.channel.request_pty_size(columns, rows);
+                }
             });
         }
 
