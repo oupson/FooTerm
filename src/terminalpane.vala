@@ -27,11 +27,21 @@ namespace Footerm {
         private SSH2.Session<bool>? session;
         private SSH2.Channel? channel;
         private SocketConnection socket;
-        private int slave_pty;
+        private IOChannel slave_channel;
 
-        private Footerm.Model.Server server;
+        private Footerm.Model.Server? server;
 
-        public TerminalPane(Footerm.Model.Server server) {
+        public TerminalPane() {
+
+            this.terminal.char_size_changed.connect(() => {
+                int rows = 0;
+                int columns = 0;
+                this.terminal.get_pty().get_size(out rows, out columns);
+                this.channel.request_pty_size(columns, rows);
+            });
+        }
+
+        public void connect(Footerm.Model.Server server) {
             this.server = server;
             this.terminal.set_enable_sixel(true);
             this.connect_to_server.begin((obj, res) => {
@@ -134,8 +144,8 @@ namespace Footerm {
                     throw GLib.IOError.from_errno(Posix.errno);
                 }
 
-                this.slave_pty = Posix.open(pts_name, Posix.O_RDWR);
-                if (this.slave_pty < 0) {
+                var slave_pty = Posix.open(pts_name, Posix.O_RDWR);
+                if (slave_pty < 0) {
                     throw GLib.IOError.from_errno(Posix.errno);
                 }
 
@@ -149,7 +159,7 @@ namespace Footerm {
                 source.set_callback(this.on_ssh_event);
                 source.attach(null);
 
-                var slave_channel = new GLib.IOChannel.unix_new(slave_pty);
+                this.slave_channel = new GLib.IOChannel.unix_new(slave_pty);
                 slave_channel.set_encoding(null);
                 slave_channel.set_buffered(false);
                 slave_channel.add_watch(GLib.IOCondition.IN, this.on_slave_event);
@@ -169,9 +179,8 @@ namespace Footerm {
                     size = this.channel.read(buffer);
                     if (size > 0) {
                         debug("Got %zd bytes from ssh", size);
-                        if (Posix.write(this.slave_pty, buffer, size) < 0) {
-                            throw GLib.IOError.from_errno(Posix.errno);
-                        }
+                        size_t written_size = 0;
+                        this.slave_channel.write_chars((char[]) (buffer[0 : size]), out written_size);
                     } else if ((size == 0 && channel.eof() != 0) || (size < 0 && size != SSH2.Error.AGAIN)) {
                         warning("Channel is closed");
                         return false;

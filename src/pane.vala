@@ -21,15 +21,23 @@
 namespace Footerm {
     [GtkTemplate (ui = "/fr/oupson/FooTerm/pane.ui")]
     public class Pane : Gtk.Box {
+        [GtkChild]
+        private unowned Adw.ViewStack footerm_pane_stack;
+
+        [GtkChild]
+        private unowned Footerm.NewPane new_pane;
+
+        [GtkChild]
+        private unowned Footerm.TerminalPane terminal_pane;
+
         construct {
-            var new_pane = new Footerm.NewPane();
-            ulong handler_id;
-            handler_id = new_pane.on_server_selected.connect((s) => {
-                new_pane.disconnect (handler_id);
-                this.remove(new_pane);
-                this.append(new Footerm.TerminalPane(s));
+            this.new_pane.on_server_selected.connect ((s) => {
+                this.footerm_pane_stack.set_visible_child (this.terminal_pane);
+                this.terminal_pane.connect (s);
             });
-            this.append(new_pane);
+        }
+
+        async void close () {
         }
     }
 }

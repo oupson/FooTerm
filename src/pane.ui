@@ -1,5 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <template class="FootermPane" parent="GtkBox">
-
+    <child>
+      <object id="footerm_pane_stack" class="AdwViewStack">
+        <property name="vexpand">True</property>
+        <child>
+          <object id="new_pane" class="FootermNewPane"></object>
+        </child>
+        <child>
+          <object id="terminal_pane" class="FootermTerminalPane"></object>
+        </child>
+      </object>
+    </child>
   </template>
 </interface>
