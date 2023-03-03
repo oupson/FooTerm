@@ -31,7 +31,7 @@ namespace Footerm {
                 { "quit", this.quit }
             };
             this.add_action_entries (action_entries, this);
-            this.set_accels_for_action ("app.quit", {"<primary>q"});
+            this.set_accels_for_action ("app.quit", { "<primary>q" });
             this.set_accels_for_action ("win.new_tab", { "<Control><Shift>T", null });
         }
 
