@@ -29,6 +29,7 @@ namespace Footerm {
         }
 
         construct {
+            this.view.close_page.connect (this.close_page);
             var action = new SimpleAction ("new_tab", null);
             action.activate.connect (() => {
                 var a = view.append (new Footerm.Pane ());
@@ -38,6 +39,13 @@ namespace Footerm {
             this.add_action (action);
             var a = view.append (new Footerm.Pane ());
             a.set_title ("New Pane");
+        }
+
+        private bool close_page (Adw.TabView tab_view, Adw.TabPage page) {
+            // TODO CLOSE CONNEXION FOR PANE
+            debug ("Close pane");
+            tab_view.close_page_finish (page, !page.get_pinned ());
+            return Gdk.EVENT_STOP;
         }
     }
 }
