@@ -60,12 +60,44 @@ namespace Footerm {
             });
         }
 
-        ~TerminalPane() {
-            // TODO DESTRUCT
-            // session.disconnect( "Normal Shutdown, Thank you for playing");
-            // session = null;
-            // Posix.close(sock);
-            // stdout.printf("all done!\n");)
+        private void create_pty() throws GLib.IOError {
+            var master_pty = Posix.posix_openpt(Posix.O_RDWR);
+            if (master_pty == -1) {
+                throw GLib.IOError.from_errno(Posix.errno);
+            }
+
+            var settings = Posix.termios();
+            Posix.cfmakeraw(ref settings);
+
+            if (Posix.tcsetattr(master_pty, Posix.TCSANOW, settings) == -1) {
+                throw GLib.IOError.from_errno(Posix.errno);
+            }
+
+            if (Posix.grantpt(master_pty) == -1) {
+                throw GLib.IOError.from_errno(Posix.errno);
+            }
+
+            if (Posix.unlockpt(master_pty) == -1) {
+                throw GLib.IOError.from_errno(Posix.errno);
+            }
+
+            var pts_name = Posix.ptsname(master_pty);
+            if (pts_name == null) {
+                throw GLib.IOError.from_errno(Posix.errno);
+            }
+
+            var slave_pty = Posix.open(pts_name, Posix.O_RDWR);
+            if (slave_pty < 0) {
+                throw GLib.IOError.from_errno(Posix.errno);
+            }
+
+
+            var vte_pty = new Vte.Pty.foreign_sync(master_pty, null);
+            this.terminal.set_pty(vte_pty);
+
+            this.slave_channel = new GLib.IOChannel.unix_new(slave_pty);
+            slave_channel.set_encoding(null);
+            slave_channel.set_buffered(false);
         }
 
         private async void connect_to_server() throws GLib.IOError, GLib.Error {
@@ -120,49 +152,15 @@ namespace Footerm {
                     this.socket.close();
                 }
 
-                var master_pty = Posix.posix_openpt(Posix.O_RDWR);
-                if (master_pty == -1) {
-                    throw GLib.IOError.from_errno(Posix.errno);
-                }
-
-                var settings = Posix.termios();
-                Posix.cfmakeraw(ref settings);
-
-                if (Posix.tcsetattr(master_pty, Posix.TCSANOW, settings) == -1) {
-                    throw GLib.IOError.from_errno(Posix.errno);
-                }
-
-                if (Posix.grantpt(master_pty) == -1) {
-                    throw GLib.IOError.from_errno(Posix.errno);
-                }
-
-                if (Posix.unlockpt(master_pty) == -1) {
-                    throw GLib.IOError.from_errno(Posix.errno);
-                }
-
-                var pts_name = Posix.ptsname(master_pty);
-                if (pts_name == null) {
-                    throw GLib.IOError.from_errno(Posix.errno);
-                }
-
-                var slave_pty = Posix.open(pts_name, Posix.O_RDWR);
-                if (slave_pty < 0) {
-                    throw GLib.IOError.from_errno(Posix.errno);
-                }
-
-                var vte_pty = new Vte.Pty.foreign_sync(master_pty, null);
-                this.terminal.set_pty(vte_pty);
-
                 session.blocking = false;
+
+                this.create_pty();
 
                 var inner_socket = socket.get_socket();
                 var source = inner_socket.create_source(GLib.IOCondition.IN, null);
                 source.set_callback(this.on_ssh_event);
                 source.attach(null);
 
-                this.slave_channel = new GLib.IOChannel.unix_new(slave_pty);
-                slave_channel.set_encoding(null);
-                slave_channel.set_buffered(false);
                 slave_channel.add_watch(GLib.IOCondition.IN, this.on_slave_event);
             }
         }
