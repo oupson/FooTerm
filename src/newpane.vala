@@ -36,13 +36,13 @@ namespace Footerm {
         public signal void on_server_selected (Footerm.Model.Server server);
 
         construct {
-            this.new_server.on_new_server.connect ((s) => {
+            this.new_server.on_new_server.connect ((server) => {
                 this.newpane_stack.set_visible_child (server_list.get_parent ());
                 var action_row = new Adw.ActionRow ();
-                action_row.set_title (s.hostname);
+                action_row.set_title (server.name);
                 action_row.set_activatable (true);
                 action_row.activated.connect (() => {
-                    this.on_server_selected (s);
+                    this.on_server_selected (server);
                 });
                 server_list.add (action_row);
             });
