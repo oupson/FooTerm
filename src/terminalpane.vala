@@ -34,6 +34,9 @@ namespace Footerm {
 
         private Footerm.Model.Server? server;
 
+        private int old_terminal_width = 0;
+        private int old_terminal_height = 0;
+
         construct {
             this.configure_terminal();
         }
@@ -78,15 +81,22 @@ namespace Footerm {
 
         private void configure_terminal() {
             this.terminal.set_enable_sixel(true);
-            this.terminal.char_size_changed.connect(() => {
-                var pty = this.terminal.get_pty();
-                if (pty != null && this.channel != null) {
-                    int rows = 0;
-                    int columns = 0;
-                    pty.get_size(out rows, out columns);
+            this.terminal.char_size_changed.connect(this.terminal_appearance_changed);
+            this.terminal.contents_changed.connect(this.terminal_appearance_changed);
+        }
+
+        private void terminal_appearance_changed() {
+            var pty = this.terminal.get_pty();
+            if (pty != null && this.channel != null) {
+                int rows = 0;
+                int columns = 0;
+                pty.get_size(out rows, out columns);
+                if (rows != this.old_terminal_height || columns != this.old_terminal_width) {
+                    this.old_terminal_height = rows;
+                    this.old_terminal_width = columns;
                     this.channel.request_pty_size(columns, rows);
                 }
-            });
+            }
         }
 
         private void create_pty() throws GLib.IOError {
