@@ -42,9 +42,16 @@ namespace Footerm {
         }
 
         private bool close_page (Adw.TabView tab_view, Adw.TabPage page) {
-            // TODO CLOSE CONNEXION FOR PANE
-            debug ("Close pane");
-            tab_view.close_page_finish (page, !page.get_pinned ());
+            if (!page.get_pinned ()) {
+                var child = (Footerm.Pane) page.get_child ();
+                child.close.begin ((obj, res) => {
+                    child.close.end (res);
+                    tab_view.close_page_finish (page, true);
+                });
+            } else {
+                tab_view.close_page_finish (page, false);
+            }
+
             return Gdk.EVENT_STOP;
         }
     }

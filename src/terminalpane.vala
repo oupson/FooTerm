@@ -24,10 +24,13 @@ namespace Footerm {
         [GtkChild]
         private unowned Vte.Terminal terminal;
 
-        private SSH2.Session<bool>? session;
-        private SSH2.Channel? channel;
-        private SocketConnection socket;
-        private IOChannel slave_channel;
+        private SSH2.Session<bool>? session = null;
+        private SSH2.Channel? channel = null;
+        private SocketConnection? socket = null;
+        private IOChannel? slave_channel = null;
+        private SocketSource? socket_source = null;
+
+        private Cancellable cancel = new Cancellable();
 
         private Footerm.Model.Server? server;
 
@@ -45,6 +48,32 @@ namespace Footerm {
                     warning("Failed to connect to the server : %s", e.message);
                 }
             });
+        }
+
+        public async void disconnect_from_server() {
+            debug("Disconnecting ...");
+            if (this.session != null) {
+                this.socket_source.destroy();
+                this.socket_source = null;
+
+                this.slave_channel.shutdown(true);
+                this.slave_channel = null;
+
+                this.cancel.cancel();
+                this.session.blocking = true;
+
+                this.channel.close();
+                this.channel = null;
+
+                this.session.disconnect("Terminal pane was closed");
+                this.session = null;
+
+                yield this.socket.close_async(0, null);
+
+                this.socket = null;
+
+                this.server = null;
+            }
         }
 
         private void configure_terminal() {
@@ -91,8 +120,7 @@ namespace Footerm {
                 throw GLib.IOError.from_errno(Posix.errno);
             }
 
-
-            var vte_pty = new Vte.Pty.foreign_sync(master_pty, null);
+            var vte_pty = new Vte.Pty.foreign_sync(master_pty, this.cancel);
             this.terminal.set_pty(vte_pty);
 
             this.slave_channel = new GLib.IOChannel.unix_new(slave_pty);
@@ -157,9 +185,9 @@ namespace Footerm {
                 this.create_pty();
 
                 var inner_socket = socket.get_socket();
-                var source = inner_socket.create_source(GLib.IOCondition.IN, null);
-                source.set_callback(this.on_ssh_event);
-                source.attach(null);
+                this.socket_source = inner_socket.create_source(GLib.IOCondition.IN, this.cancel);
+                this.socket_source.set_callback(this.on_ssh_event);
+                this.socket_source.attach(null);
 
                 slave_channel.add_watch(GLib.IOCondition.IN, this.on_slave_event);
             }
@@ -168,6 +196,10 @@ namespace Footerm {
         private bool on_ssh_event(Socket source, GLib.IOCondition condition) {
             if (condition == IOCondition.HUP) {
                 print("The connection has been broken.\n");
+                return false;
+            }
+
+            if (this.cancel.is_cancelled()) {
                 return false;
             }
 
@@ -207,6 +239,7 @@ namespace Footerm {
                 var res = this.channel.write((uint8[]) buffer[0 : size]);
                 if (res < 0) {
                     warning("Channel write failed with %zu", res);
+                    return false;
                 }
                 return true;
             } catch (Error e) {

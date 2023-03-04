@@ -37,7 +37,8 @@ namespace Footerm {
             });
         }
 
-        async void close () {
+        public async void close () {
+            yield this.terminal_pane.disconnect_from_server();
         }
     }
 }
