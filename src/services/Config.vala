@@ -160,7 +160,63 @@ namespace Footerm.Services {
                 throw new ConfigError.DATABASE(@"Can't insert server: $(db.errcode ()): $(db.errmsg ())");
             }
 
-            server.id = (int)this.db.last_insert_rowid();
-         }
+            server.id = (int) this.db.last_insert_rowid();
+        }
+
+        public async void delete_server(Footerm.Model.Server server) throws ConfigError, SecretError, Error {
+            var stm_str = "SELECT COUNT(serverId) FROM SERVER WHERE serverHostName = ? AND serverPort = ? AND serverUsername = ? AND serverAuthentificationType = 'password'";
+            Sqlite.Statement stm;
+
+            var ec = this.db.prepare_v2(stm_str, stm_str.length, out stm);
+            if (ec != Sqlite.OK) {
+                throw new ConfigError.DATABASE(@"Can't delete server: $(db.errcode ()): $(db.errmsg ())");
+            }
+
+            ec = stm.bind_text(1, server.hostname);
+            if (ec != Sqlite.OK) {
+                throw new ConfigError.DATABASE(@"Can't delete server: $(db.errcode ()): $(db.errmsg ())");
+            }
+
+            ec = stm.bind_int(2, server.port);
+            if (ec != Sqlite.OK) {
+                throw new ConfigError.DATABASE(@"Can't delete server: $(db.errcode ()): $(db.errmsg ())");
+            }
+
+            ec = stm.bind_text(3, server.username);
+            if (ec != Sqlite.OK) {
+                throw new ConfigError.DATABASE(@"Can't delete server: $(db.errcode ()): $(db.errmsg ())");
+            }
+
+            ec = stm.step();
+            if (ec != Sqlite.ROW) {
+                throw new ConfigError.DATABASE(@"Can't delete server: $(db.errcode ()): $(db.errmsg ())");
+            }
+
+            var delete_from_secret = stm.column_int(0) == 1;
+            stm.reset();
+
+            stm_str = "DELETE FROM SERVER WHERE serverId = ?";
+
+            ec = this.db.prepare_v2(stm_str, stm_str.length, out stm);
+            if (ec != Sqlite.OK) {
+                throw new ConfigError.DATABASE(@"Can't delete server: $(db.errcode ()): $(db.errmsg ())");
+            }
+
+            ec = stm.bind_int(1, server.id);
+            if (ec != Sqlite.OK) {
+                throw new ConfigError.DATABASE(@"Can't delete server: $(db.errcode ()): $(db.errmsg ())");
+            }
+
+            ec = stm.step();
+            if (ec != Sqlite.DONE) {
+                throw new ConfigError.DATABASE(@"Can't delete server: $(db.errcode ()): $(db.errmsg ())");
+            }
+            stm.reset();
+
+            if (delete_from_secret) {
+                var secrets = Secrets.get_instance();
+                yield secrets.delete_password(server);
+            }
+        }
     }
 }

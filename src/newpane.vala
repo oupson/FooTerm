@@ -19,7 +19,7 @@
  */
 
 namespace Footerm {
-    [GtkTemplate (ui = "/fr/oupson/FooTerm/newpane.ui")]
+    [GtkTemplate(ui = "/fr/oupson/FooTerm/newpane.ui")]
     public class NewPane : Gtk.Box {
         [GtkChild]
         private unowned Adw.PreferencesGroup server_list;
@@ -33,39 +33,56 @@ namespace Footerm {
         [GtkChild]
         private unowned Gtk.Button newpane_add_button;
 
-        public signal void on_server_selected (Footerm.Model.Server server);
+        public signal void on_server_selected(Footerm.Model.Server server);
+
+        private Footerm.Services.Config config;
 
         construct {
-            this.new_server.on_new_server.connect ((server) => {
-                this.newpane_stack.set_visible_child (server_list.get_parent ());
-                var action_row = new Adw.ActionRow ();
-                action_row.set_title (server.name);
-                action_row.set_activatable (true);
-                action_row.activated.connect (() => {
-                    this.on_server_selected (server);
-                });
-                server_list.add (action_row);
+            this.new_server.on_new_server.connect((server) => {
+                this.newpane_stack.set_visible_child(server_list.get_parent());
+                server_list.add(this.build_action_row(server));
             });
-            this.newpane_add_button.clicked.connect (() => {
-                this.newpane_stack.set_visible_child (new_server.get_parent ());
+            this.newpane_add_button.clicked.connect(() => {
+                this.newpane_stack.set_visible_child(new_server.get_parent());
             });
 
             try {
-                var config = Footerm.Services.Config.get_instance ();
+                this.config = Footerm.Services.Config.get_instance();
 
-                var stored_server_list = config.get_server_list ();
+                var stored_server_list = this.config.get_server_list();
                 foreach (var server in stored_server_list) {
-                    var action_row = new Adw.ActionRow ();
-                    action_row.set_title (server.name);
-                    action_row.set_activatable (true);
-                    action_row.activated.connect (() => {
-                        this.on_server_selected (server);
-                    });
-                    server_list.add (action_row);
+                    this.server_list.add(this.build_action_row(server));
                 }
             } catch (Error e) {
-                GLib.warning ("Failed to read server list : %s", e.message);
+                GLib.warning("Failed to read server list : %s", e.message);
             }
+        }
+
+        private Adw.ActionRow build_action_row(Footerm.Model.Server server) {
+            var action_row = new Adw.ActionRow();
+            action_row.set_title(server.name);
+            action_row.set_activatable(true);
+            action_row.activated.connect(() => {
+                this.on_server_selected(server);
+            });
+            var delete_button = new Gtk.Button();
+            delete_button.set_icon_name("edit-delete-symbolic");
+            delete_button.set_valign(Gtk.Align.CENTER);
+            delete_button.add_css_class("edit-icon");
+            delete_button.add_css_class("flat");
+            delete_button.clicked.connect(() => {
+                this.config.delete_server.begin(server, (obj, res) => {
+                    try {
+                        this.config.delete_server.end(res);
+                        this.server_list.remove(action_row);
+                    } catch (Error e) {
+                        // TODO WARN USER
+                        warning("Failed to delete : %s", e.message);
+                    }
+                });
+            });
+            action_row.add_suffix(delete_button);
+            return action_row;
         }
     }
 }

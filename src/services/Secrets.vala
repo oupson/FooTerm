@@ -64,5 +64,13 @@ namespace Footerm.Services {
 
             return yield Secret.password_lookupv(this.password_schema, attributes, null);
         }
+
+        public async void delete_password(Footerm.Model.Server server) throws Error {
+            var attributes = new GLib.HashTable<string, string> (str_hash, str_equal);
+            attributes["hostname"] = server.hostname;
+            attributes["port"] = server.port.to_string();
+            attributes["username"] = server.username;
+            yield Secret.password_clearv(this.password_schema, attributes, null);
+        }
     }
 }
