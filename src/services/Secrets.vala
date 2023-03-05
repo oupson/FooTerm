@@ -48,7 +48,7 @@ namespace Footerm.Services {
             attributes["port"] = server.port.to_string();
             attributes["username"] = server.username;
 
-            var res = yield Secret.password_storev(this.password_schema, attributes, Secret.COLLECTION_DEFAULT, @"$(server.username)@$(server.hostname):$(server.port)", password, null);
+            var res = yield Secret.password_storev(this.password_schema, attributes, Secret.COLLECTION_DEFAULT, @"SSH: $(server.username)@$(server.hostname):$(server.port)", password, null);
 
             if (!res) {
                 throw new SecretError.FAILED_TO_STORE("Failed to store the password");
