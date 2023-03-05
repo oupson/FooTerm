@@ -83,6 +83,36 @@ namespace Footerm {
             this.terminal.set_enable_sixel(true);
             this.terminal.char_size_changed.connect(this.terminal_appearance_changed);
             this.terminal.contents_changed.connect(this.terminal_appearance_changed);
+            this.setup_terminal_theme();
+        }
+
+        // Default gnome color
+        private void setup_terminal_theme() {
+            var fg = Gdk.RGBA();
+            fg.parse("#D0CFCC");
+
+            var bg = Gdk.RGBA();
+            bg.parse("#171421");
+
+            var palette = new Gdk.RGBA[16];
+            palette[0].parse("#171421");
+            palette[1].parse("#C01C28");
+            palette[2].parse("#26A269");
+            palette[3].parse("#a2734c");
+            palette[4].parse("#12488b");
+            palette[5].parse("#a347ba");
+            palette[6].parse("#2aa1b3");
+            palette[7].parse("#d0cfcc");
+            palette[8].parse("#5e5c64");
+            palette[9].parse("#f66151");
+            palette[10].parse("#33da7a");
+            palette[11].parse("#e9ad0c");
+            palette[12].parse("#2a7bde");
+            palette[13].parse("#c061cb");
+            palette[14].parse("#33c7de");
+            palette[15].parse("#ffffff");
+
+            this.terminal.set_colors(fg, bg, palette);
         }
 
         private void terminal_appearance_changed() {
