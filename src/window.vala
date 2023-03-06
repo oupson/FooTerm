@@ -32,13 +32,19 @@ namespace Footerm {
             this.view.close_page.connect (this.close_page);
             var action = new SimpleAction ("new_tab", null);
             action.activate.connect (() => {
-                var a = view.append (new Footerm.Pane ());
-                a.set_title ("New Pane");
-                view.set_selected_page (a);
+                this.create_new_pane ();
             });
             this.add_action (action);
-            var a = view.append (new Footerm.Pane ());
-            a.set_title ("New Pane");
+            this.create_new_pane ();
+        }
+
+        private void create_new_pane () {
+            var pane = new Footerm.Pane ();
+            var tab_page = this.view.append (pane);
+            tab_page.set_title ("New Pane");
+            pane.title_changed.connect ((title) => {
+                tab_page.set_title (title);
+            });
         }
 
         private bool close_page (Adw.TabView tab_view, Adw.TabPage page) {

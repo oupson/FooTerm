@@ -37,6 +37,8 @@ namespace Footerm {
         private int old_terminal_width = 0;
         private int old_terminal_height = 0;
 
+        public signal void title_changed(string new_title);
+
         construct {
             this.configure_terminal();
         }
@@ -83,6 +85,13 @@ namespace Footerm {
             this.terminal.set_enable_sixel(true);
             this.terminal.char_size_changed.connect(this.terminal_appearance_changed);
             this.terminal.contents_changed.connect(this.terminal_appearance_changed);
+            this.terminal.window_title_changed.connect((t) => {
+                var terminal_title = t.window_title;
+                if (terminal_title.length == 0) {
+                    terminal_title = this.server.name;
+                }
+                this.title_changed(terminal_title);
+            });
             this.setup_terminal_theme();
         }
 
