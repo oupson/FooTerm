@@ -35,15 +35,20 @@ namespace Footerm {
 
         public signal void on_server_selected(Footerm.Model.Server server);
 
+        public signal void title_changed(string new_title);
+
         private Footerm.Services.Config config;
 
         construct {
             this.new_server.on_new_server.connect((server) => {
                 this.newpane_stack.set_visible_child(server_list.get_parent());
                 server_list.add(this.build_action_row(server));
+                this.title_changed("New Pane");
             });
+
             this.newpane_add_button.clicked.connect(() => {
                 this.newpane_stack.set_visible_child(new_server.get_parent());
+                this.title_changed("Create a new server");
             });
 
             try {

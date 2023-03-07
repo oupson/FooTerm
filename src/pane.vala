@@ -33,6 +33,7 @@ namespace Footerm {
         public signal void title_changed (string new_title);
 
         construct {
+            this.new_pane.title_changed.connect ((s) => this.title_changed (s));
             this.new_pane.on_server_selected.connect ((s) => {
                 this.footerm_pane_stack.set_visible_child (this.terminal_pane);
                 this.title_changed (s.name);
