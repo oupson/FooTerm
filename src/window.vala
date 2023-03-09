@@ -42,9 +42,12 @@ namespace Footerm {
             var pane = new Footerm.Pane ();
             var tab_page = this.view.append (pane);
             tab_page.set_title ("New Pane");
-            pane.title_changed.connect ((title) => {
-                tab_page.set_title (title);
-            });
+            pane.title_changed.connect (on_page_title_changed);
+        }
+
+        private void on_page_title_changed (Footerm.Pane pane, string title) {
+            var tab_page = this.view.get_page (pane);
+            tab_page.set_title (title);
         }
 
         private bool close_page (Adw.TabView tab_view, Adw.TabPage page) {

@@ -30,14 +30,14 @@ namespace Footerm {
         [GtkChild]
         private unowned Footerm.TerminalPane terminal_pane;
 
-        public signal void title_changed (string new_title);
+        public signal void title_changed (Footerm.Pane pane, string new_title);
 
         construct {
-            this.new_pane.title_changed.connect ((s) => this.title_changed (s));
+            this.new_pane.title_changed.connect ((s) => this.title_changed (this, s));
             this.new_pane.on_server_selected.connect ((s) => {
                 this.footerm_pane_stack.set_visible_child (this.terminal_pane);
-                this.title_changed (s.name);
-                this.terminal_pane.title_changed.connect ((s) => this.title_changed (s));
+                this.title_changed (this, s.name);
+                this.terminal_pane.title_changed.connect ((s) => this.title_changed (this, s));
                 this.terminal_pane.connect_to_server_async (s);
             });
         }
