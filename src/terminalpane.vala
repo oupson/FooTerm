@@ -243,7 +243,7 @@ namespace Footerm {
         }
 
         private bool on_ssh_event(Socket source, GLib.IOCondition condition) {
-            if (condition == IOCondition.HUP) {
+            if ((condition & IOCondition.HUP) == IOCondition.HUP) {
                 print("The connection has been broken.\n");
                 return false;
             }
@@ -275,7 +275,7 @@ namespace Footerm {
         }
 
         private bool on_slave_event(GLib.IOChannel source, GLib.IOCondition condition) {
-            if (condition == IOCondition.HUP) {
+            if ((condition & IOCondition.HUP) == IOCondition.HUP) {
                 print("The connection has been broken.\n");
                 return false;
             }
