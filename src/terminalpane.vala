@@ -29,6 +29,7 @@ namespace Footerm {
         private SocketConnection? socket = null;
         private IOChannel? slave_channel = null;
         private SocketSource? socket_source = null;
+        private Source? slave_source = null;
 
         private Cancellable cancel = new Cancellable();
 
@@ -41,6 +42,10 @@ namespace Footerm {
 
         construct {
             this.configure_terminal();
+        }
+
+        ~TerminalPane() {
+            debug("finally");
         }
 
         public void connect_to_server_async(Footerm.Model.Server server) {
@@ -58,6 +63,9 @@ namespace Footerm {
         public async void disconnect_from_server() {
             debug("Disconnecting ...");
             if (this.session != null) {
+                this.slave_source.destroy();
+                this.slave_source = null;
+
                 this.socket_source.destroy();
                 this.socket_source = null;
 

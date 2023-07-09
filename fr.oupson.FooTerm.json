@@ -1,7 +1,7 @@
 {
     "app-id" : "fr.oupson.FooTerm",
     "runtime" : "org.gnome.Platform",
-    "runtime-version" : "43",
+    "runtime-version" : "44",
     "sdk" : "org.gnome.Sdk",
     "sdk-extensions" : [
         "org.freedesktop.Sdk.Extension.vala"
@@ -35,7 +35,7 @@
     	{
 	      "name": "vte",
 	      "buildsystem": "meson",
-	      "config-opts": ["-Dgtk4=true", "-Dgtk3=false", "-Dsixel=true"],
+	      "config-opts": ["-Dgtk4=true", "-Dgtk3=false", "-Dsixel=true", "--buildtype=debug"],
 	      "sources": [
 	        {
 	          "type": "archive",
